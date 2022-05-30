@@ -33,21 +33,21 @@ import java.util.TreeSet;
  * @param <T> type of the node
  * @since 2.0.0
  */
-public class DependencyGraph<T extends Comparable<T>> {
+public class DependencyGraph<T> {
     @SuppressWarnings("rawtypes")
-    private static final DependencyGraph EMPTY_GRAPH = new DependencyGraph<>(null, new HashMap<>());
+    private static final DependencyGraph EMPTY_GRAPH = new DependencyGraph(null, new HashMap<>());
     private final T rootNode;
     private final Map<T, Set<T>> dependencies;
 
     private List<T> topologicallySortedNodes;
 
     @SuppressWarnings("unchecked")
-    public static <T extends Comparable<T>> DependencyGraph<T> emptyGraph() {
+    public static <T> DependencyGraph<T> emptyGraph() {
         return (DependencyGraph<T>) EMPTY_GRAPH;
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends Comparable<T>> DependencyGraph<T> from(Map<T, Set<T>> dependencies) {
+    public static <T> DependencyGraph<T> from(Map<T, Set<T>> dependencies) {
         if (dependencies.isEmpty()) {
             return (DependencyGraph<T>) EMPTY_GRAPH;
         }
@@ -159,7 +159,7 @@ public class DependencyGraph<T extends Comparable<T>> {
      * @param <T> type of the node
      * @since 2.0.0
      */
-    public static class DependencyGraphBuilder<T extends Comparable<T>> {
+    public static class DependencyGraphBuilder<T> {
         private final T rootNode;
         private final Map<T, Set<T>> dependenciesMap;
 
@@ -168,11 +168,11 @@ public class DependencyGraph<T extends Comparable<T>> {
             this.dependenciesMap = dependencies;
         }
 
-        public static <T extends Comparable<T>> DependencyGraphBuilder<T> getBuilder() {
+        public static <T> DependencyGraphBuilder<T> getBuilder() {
             return new DependencyGraphBuilder<>(null, new HashMap<>());
         }
 
-        public static <T extends Comparable<T>> DependencyGraphBuilder<T> getBuilder(T rootNode) {
+        public static <T> DependencyGraphBuilder<T> getBuilder(T rootNode) {
             return new DependencyGraphBuilder<>(rootNode, new HashMap<>());
         }
 

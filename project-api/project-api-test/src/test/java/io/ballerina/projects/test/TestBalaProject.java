@@ -18,26 +18,9 @@
 
 package io.ballerina.projects.test;
 
-import io.ballerina.projects.BuildOptions;
-import io.ballerina.projects.DependencyGraph;
-import io.ballerina.projects.DocumentId;
-import io.ballerina.projects.EmitResult;
-import io.ballerina.projects.JBallerinaBackend;
-import io.ballerina.projects.JvmTarget;
+import io.ballerina.projects.*;
 import io.ballerina.projects.Module;
-import io.ballerina.projects.ModuleId;
-import io.ballerina.projects.ModuleMd;
-import io.ballerina.projects.ModuleName;
 import io.ballerina.projects.Package;
-import io.ballerina.projects.PackageCompilation;
-import io.ballerina.projects.PackageManifest;
-import io.ballerina.projects.PackageMd;
-import io.ballerina.projects.PackageResolution;
-import io.ballerina.projects.Project;
-import io.ballerina.projects.ProjectEnvironmentBuilder;
-import io.ballerina.projects.ProjectException;
-import io.ballerina.projects.ProjectKind;
-import io.ballerina.projects.ResolvedPackageDependency;
 import io.ballerina.projects.bala.BalaProject;
 import io.ballerina.projects.directory.BuildProject;
 import io.ballerina.projects.internal.model.CompilerPluginDescriptor;
@@ -130,7 +113,7 @@ public class TestBalaProject {
         PackageResolution resolution = currentPackage.getResolution();
         DependencyGraph<ResolvedPackageDependency> packageDescriptorDependencyGraph = resolution.dependencyGraph();
         Assert.assertEquals(packageDescriptorDependencyGraph.getNodes().size(), 1);
-        DependencyGraph<ModuleId> moduleIdDependencyGraph = currentPackage.moduleDependencyGraph();
+        DependencyGraph<ModuleDescriptor> moduleIdDependencyGraph = currentPackage.moduleDependencyGraph();
         Assert.assertEquals(moduleIdDependencyGraph.getNodes().size(), 3);
 
         // compiler plugin

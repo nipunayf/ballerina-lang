@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -45,7 +46,7 @@ public class ModuleCompilation {
     private final PackageCache packageCache;
     private final CompilerContext compilerContext;
 
-    private final DependencyGraph<ModuleId> dependencyGraph;
+    private final DependencyGraph<ModuleDescriptor> dependencyGraph;
     private DiagnosticResult diagnosticResult;
 
     ModuleCompilation(PackageContext packageContext, ModuleContext moduleContext) {
@@ -63,30 +64,32 @@ public class ModuleCompilation {
         compile();
     }
 
-    private DependencyGraph<ModuleId> buildDependencyGraph() {
-        Map<ModuleId, Set<ModuleId>> dependencyIdMap = new HashMap<>();
-        addModuleDependencies(moduleContext.moduleId(), dependencyIdMap);
+    private DependencyGraph<ModuleDescriptor> buildDependencyGraph() {
+        Map<ModuleDescriptor, Set<ModuleDescriptor>> dependencyIdMap = new HashMap<>();
+        addModuleDependencies(moduleContext.descriptor(), dependencyIdMap);
         return DependencyGraph.from(dependencyIdMap);
     }
 
-    private void addModuleDependencies(ModuleId moduleId, Map<ModuleId, Set<ModuleId>> dependencyIdMap) {
-        Package pkg = packageCache.getPackageOrThrow(moduleId.packageId());
-        Collection<ModuleId> directDependencies = new HashSet<>(pkg.moduleDependencyGraph().
-                getDirectDependencies(moduleId));
+    private void addModuleDependencies(ModuleDescriptor moduleDesc,
+                                       Map<ModuleDescriptor, Set<ModuleDescriptor>> dependencyIdMap) {
+        Optional<Package> pkg = packageCache.getPackage(moduleDesc.org(),
+                moduleDesc.packageName(), moduleDesc.version());
+        Collection<ModuleDescriptor> directDependencies = new HashSet<>(pkg.get().moduleDependencyGraph().
+                getDirectDependencies(moduleDesc));
 
-        ModuleContext moduleCtx = pkg.packageContext().moduleContext(moduleId);
+        ModuleContext moduleCtx = pkg.get().packageContext().moduleContext(moduleDesc.name());
         for (ModuleDependency moduleDependency : moduleCtx.dependencies()) {
             PackageId dependentPkgId = moduleDependency.packageDependency().packageId();
-            if (dependentPkgId == pkg.packageId()) {
+            if (dependentPkgId == pkg.get().packageId()) {
                 continue;
             }
-            ModuleId dependentModuleId = moduleDependency.moduleId();
+            ModuleDescriptor dependentModuleId = moduleDependency.descriptor();
             directDependencies.add(dependentModuleId);
             addModuleDependencies(dependentModuleId, dependencyIdMap);
         }
 
-        dependencyIdMap.put(moduleId, new HashSet<>(directDependencies));
-        for (ModuleId depModuleId : directDependencies) {
+        dependencyIdMap.put(moduleDesc, new HashSet<>(directDependencies));
+        for (ModuleDescriptor depModuleId : directDependencies) {
             addModuleDependencies(depModuleId, dependencyIdMap);
         }
     }
@@ -94,10 +97,11 @@ public class ModuleCompilation {
     private void compile() {
         // Compile all the modules
         List<Diagnostic> diagnostics = new ArrayList<>();
-        List<ModuleId> sortedModuleIds = dependencyGraph.toTopologicallySortedList();
-        for (ModuleId sortedModuleId : sortedModuleIds) {
-            Package pkg = packageCache.getPackageOrThrow(sortedModuleId.packageId());
-            ModuleContext moduleContext = pkg.module(sortedModuleId).moduleContext();
+        List<ModuleDescriptor> sortedModuleIds = dependencyGraph.toTopologicallySortedList();
+        for (ModuleDescriptor sortedModuleId : sortedModuleIds) {
+            Optional<Package> pkg = packageCache.getPackage(sortedModuleId.org(),
+                    sortedModuleId.packageName(), sortedModuleId.version());
+            ModuleContext moduleContext = pkg.get().module(sortedModuleId.name()).moduleContext();
             moduleContext.compile(compilerContext);
             for (Diagnostic diagnostic : moduleContext.diagnostics()) {
                 diagnostics.add(new PackageDiagnostic(diagnostic, moduleContext.descriptor(), moduleContext.project()));
