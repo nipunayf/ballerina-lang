@@ -402,6 +402,7 @@ import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordVarRef.BLangR
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangRegExpTemplateLiteral;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangRestArgsExpression;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangSimpleVarRef;
+import org.wso2.ballerinalang.compiler.tree.expressions.BLangStatementExpression;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangStringTemplateLiteral;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangTableConstructorExpr;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangTernaryExpr;
@@ -5531,7 +5532,37 @@ public class BLangNodeBuilder extends NodeTransformer<BLangNode> {
             typeAccessExpr.pos = getPosition(actionOrExpression);
             typeAccessExpr.typeNode = createTypeNode(actionOrExpression);
             return typeAccessExpr;
-        } else {
+        } else if (actionOrExpression.kind() == SyntaxKind.DO_STATEMENT &&
+                (actionOrExpression.parent().kind() == SyntaxKind.LOCAL_VAR_DECL)) {
+            BLangNode doNode = actionOrExpression.apply(this);
+            BLangStatementExpression stmtExpr = (BLangStatementExpression) TreeBuilder.creatStatementExpression();
+            BLangDo doStmt = (BLangDo) doNode;
+            stmtExpr.stmt = doStmt;
+
+            List<BLangStatement> stmts = doStmt.getBody().getStatements();
+            int noStmts = stmts.size();
+            BLangExpression doExpr = null;
+
+            for (int i = 0; i < noStmts; i++) {
+                BLangStatement stmt = stmts.get(i);
+                if (stmt.getKind() == NodeKind.EXPRESSION_STATEMENT) {
+                    BLangExpressionStmt exprStmt = (BLangExpressionStmt) stmt;
+                    exprStmt.allowAsStatement = true;
+                    doExpr = exprStmt.expr;
+                    if (i < noStmts - 1) {
+                        dlog.error(stmt.pos, DiagnosticErrorCode.INVALID_EXPR_STATEMENT);
+                    }
+                }
+            }
+
+            if (doExpr == null) {
+                dlog.error(doStmt.pos, DiagnosticErrorCode.ASSIGNMENT_REQUIRED);
+            }
+
+            stmtExpr.expr = doExpr;
+            return stmtExpr;
+        }
+        else {
             return actionOrExpression.apply(this);
         }
     }

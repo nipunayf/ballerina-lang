@@ -33,6 +33,7 @@ public class BLangExpressionStmt extends BLangStatement implements ExpressionSta
 
     // BLangNodes
     public BLangExpression expr;
+    public boolean allowAsStatement;
 
     public BLangExpressionStmt() {
     }

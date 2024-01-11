@@ -681,6 +681,7 @@ public class NodeCloner extends BLangNodeVisitor {
         BLangExpressionStmt clone = new BLangExpressionStmt();
         source.cloneRef = clone;
         clone.expr = clone(source.expr);
+        clone.allowAsStatement = source.allowAsStatement;
     }
 
     @Override

@@ -2787,7 +2787,8 @@ public class SemanticAnalyzer extends SimpleBLangNodeAnalyzer<SemanticAnalyzer.A
         BLangExpression expr = exprStmtNode.expr;
         BType bType = data.typeChecker.checkExpr(expr, stmtEnv, data.prevEnvs, data.commonAnalyzerData);
         if (!types.isAssignable(bType, symTable.nilType) && bType != symTable.semanticError &&
-                expr.getKind() != NodeKind.FAIL && !types.isNeverTypeOrStructureTypeWithARequiredNeverMember(bType)) {
+                expr.getKind() != NodeKind.FAIL && !types.isNeverTypeOrStructureTypeWithARequiredNeverMember(bType) &&
+                !exprStmtNode.allowAsStatement) {
             dlog.error(exprStmtNode.pos, DiagnosticErrorCode.ASSIGNMENT_REQUIRED, bType);
         } else if (expr.getKind() == NodeKind.INVOCATION &&
                 types.isNeverTypeOrStructureTypeWithARequiredNeverMember(expr.getBType())) {

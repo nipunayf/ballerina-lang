@@ -147,6 +147,7 @@ import org.wso2.ballerinalang.compiler.tree.expressions.BLangRegExpTemplateLiter
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangRestArgsExpression;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangServiceConstructorExpr;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangSimpleVarRef;
+import org.wso2.ballerinalang.compiler.tree.expressions.BLangStatementExpression;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangStringTemplateLiteral;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangTableConstructorExpr;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangTernaryExpr;
@@ -2545,6 +2546,10 @@ public class DataflowAnalyzer extends BLangNodeVisitor {
             node.accept(this);
         }
         this.env = prevEnv;
+    }
+    public void visit(BLangStatementExpression node) {
+        analyzeNode(node.stmt, env);
+        analyzeNode(node.expr, env);
     }
 
     private Map<BSymbol, InitStatus> mergeUninitializedVars(Map<BSymbol, InitStatus> firstUninitVars,

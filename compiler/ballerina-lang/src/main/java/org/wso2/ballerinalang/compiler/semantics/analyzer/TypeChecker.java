@@ -136,6 +136,7 @@ import org.wso2.ballerinalang.compiler.tree.expressions.BLangRegExpTemplateLiter
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangRestArgsExpression;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangServiceConstructorExpr;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangSimpleVarRef;
+import org.wso2.ballerinalang.compiler.tree.expressions.BLangStatementExpression;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangStringTemplateLiteral;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangTableConstructorExpr;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangTernaryExpr;
@@ -1088,6 +1089,12 @@ public class TypeChecker extends SimpleBLangNodeAnalyzer<TypeChecker.AnalyzerDat
         }
 
         data.resultType = checkListConstructorCompatibility(expType, listConstructor, data);
+    }
+
+    @Override
+    public void visit(BLangStatementExpression node, AnalyzerData data) {
+        visitNode(node.stmt, data);
+        visitNode(node.expr, data);
     }
 
     @Override
@@ -6277,6 +6284,7 @@ public class TypeChecker extends SimpleBLangNodeAnalyzer<TypeChecker.AnalyzerDat
         if (doNode.onFailClause != null) {
             doNode.onFailClause.accept(this, data);
         }
+        this.semanticAnalyzer.analyzeNode(doNode, data.env);
     }
 
     public void visit(BLangOnFailClause onFailClause, AnalyzerData data) {
