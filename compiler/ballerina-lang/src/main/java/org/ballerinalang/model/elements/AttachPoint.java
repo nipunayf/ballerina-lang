@@ -104,7 +104,12 @@ public class AttachPoint {
         /**
          * Indicate class Attach point.
          */
-        CLASS("class");
+        CLASS("class"),
+        /**
+         * Indicate do Attach point.
+         */
+        DO("do");
+
 
         private String value;
 
