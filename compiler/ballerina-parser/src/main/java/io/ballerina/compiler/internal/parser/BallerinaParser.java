@@ -5140,7 +5140,7 @@ public class BallerinaParser extends AbstractParser {
             case LT_TOKEN:
                 return parseTypeCastExpr(isRhsExpr, allowActions, isInConditionalExpr);
             case DO_KEYWORD:
-                return parseDoStatement(annots);
+                return parseDoStatement(getAnnotations(annots));
             case TABLE_KEYWORD:
             case STREAM_KEYWORD:
             case FROM_KEYWORD:
@@ -5271,6 +5271,7 @@ public class BallerinaParser extends AbstractParser {
             case START_KEYWORD:
             case FUNCTION_KEYWORD:
             case OBJECT_KEYWORD:
+            case DO_KEYWORD:
                 return true;
             default:
                 return false;
